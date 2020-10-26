@@ -1,0 +1,30 @@
+- hosts: kafka
+  tasks:
+    - name: Install apt packages
+      become: True
+      apt:
+        name: ['java-1.8.0-openjdk']
+ - name: Download Kafka 
+      get_url: 
+        url: http://apache-mirror.8birdsvideo.com/kafka/2.4.0/kafka_2.11-2.4.0.tgz
+        dest: /home/ubuntu/opt/
+ - name: Unpack the tar
+      shell: tar -xzvf /home/ubuntu/opt/kafka_2.11-2.4.0.tgz
+ - name: Copy Kafka into place
+      shell: mv /home/ubuntu/opt/kafka_2.11-2.4.0 /home/ubuntu/kafka
+- name: Open firewall ports
+      become: True
+      firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - 2181/tcp
+        - 9092/tcp
+- name: Zookeeper
+  hosts: kafka
+  tasks:
+    - name: Start server
+      shell: |
+      cd kafka
+      nohup bin/zookeeper-server-start.sh config/zookeeper.properties &
